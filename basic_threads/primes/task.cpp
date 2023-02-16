@@ -2,7 +2,10 @@
 
 #include "task.h"
 
-PrimeNumbersSet::PrimeNumbersSet() = default;
+PrimeNumbersSet::PrimeNumbersSet() {
+    nanoseconds_waiting_mutex_ = 0;
+    nanoseconds_under_mutex_ = 0;
+};
     // Проверка, что данное число присутствует в множестве простых чисел
     bool PrimeNumbersSet::IsPrime(uint64_t number) const{
         //std::lock_guard<std::mutex> lo(set_mutex_);
@@ -32,12 +35,12 @@ PrimeNumbersSet::PrimeNumbersSet() = default;
                 }
             }
             if(fl && i != 1 && i != 0){
-                const std::chrono::time_point<std::chrono::high_resolution_clock> start = std::chrono::high_resolution_clock::now();
+                const std::chrono::time_point<std::chrono::steady_clock> start = std::chrono::steady_clock::now();
                 set_mutex_.lock();
-                const std::chrono::time_point<std::chrono::high_resolution_clock> finish = std::chrono::high_resolution_clock::now();
+                const std::chrono::time_point<std::chrono::steady_clock> finish = std::chrono::steady_clock::now();
                 nanoseconds_waiting_mutex_.fetch_add(std::chrono::duration<uint64_t, std::nano>(finish - start).count());
                 primes_.insert(i);
-                const std::chrono::time_point<std::chrono::high_resolution_clock> finish2 = std::chrono::high_resolution_clock::now();
+                const std::chrono::time_point<std::chrono::steady_clock> finish2 = std::chrono::steady_clock::now();
                 nanoseconds_under_mutex_.fetch_add(std::chrono::duration<uint64_t, std::nano>(finish2 - finish).count());
 
                 set_mutex_.unlock();
