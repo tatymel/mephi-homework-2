@@ -8,13 +8,13 @@ PrimeNumbersSet::PrimeNumbersSet() {
 };
     // Проверка, что данное число присутствует в множестве простых чисел
     bool PrimeNumbersSet::IsPrime(uint64_t number) const{
-        //std::lock_guard<std::mutex> lo(set_mutex_);
+        std::lock_guard<std::mutex> lo(set_mutex_);
         return primes_.find(number) != primes_.end();
     }
 
     // Получить следующее по величине простое число из множества
     uint64_t PrimeNumbersSet::GetNextPrime(uint64_t number) const{
-        //std::lock_guard<std::mutex> lo(set_mutex_);
+        std::lock_guard<std::mutex> lo(set_mutex_);
         auto it = primes_.upper_bound(number);
         if( it != primes_.end()){
             return *it;
@@ -53,7 +53,7 @@ PrimeNumbersSet::PrimeNumbersSet() {
 
     // Посчитать количество простых чисел в диапазоне [from, to)
     size_t PrimeNumbersSet::GetPrimesCountInRange(uint64_t from, uint64_t to) const{
-        //std::lock_guard<std::mutex> lo(set_mutex_);
+        std::lock_guard<std::mutex> lo(set_mutex_);
         auto itStart = primes_.lower_bound(from);
         auto itEnd = primes_.lower_bound(to);
         size_t ans = 0;
@@ -66,7 +66,7 @@ PrimeNumbersSet::PrimeNumbersSet() {
 
     // Получить наибольшее простое число из множества
     uint64_t PrimeNumbersSet::GetMaxPrimeNumber() const{
-        //std::lock_guard<std::mutex> lo(set_mutex_);
+        std::lock_guard<std::mutex> lo(set_mutex_);
         if(!primes_.empty())
             return *primes_.rbegin();
         return 0;
