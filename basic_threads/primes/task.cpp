@@ -1,6 +1,7 @@
 
 
 #include "task.h"
+#include <vector>
 
 PrimeNumbersSet::PrimeNumbersSet() {
     nanoseconds_waiting_mutex_ = 0;
@@ -24,7 +25,7 @@ PrimeNumbersSet::PrimeNumbersSet() {
     }
 
     void PrimeNumbersSet::AddPrimesInRange(uint64_t from, uint64_t to){
-
+        std::vector<uint64_t> pr;
 
         for(uint64_t i = from; i < to; ++i){
             bool fl = true;
@@ -35,20 +36,19 @@ PrimeNumbersSet::PrimeNumbersSet() {
                 }
             }
             if(fl && i != 1 && i != 0){
-                const std::chrono::time_point<std::chrono::steady_clock> start = std::chrono::steady_clock::now();
-                set_mutex_.lock();
-                const std::chrono::time_point<std::chrono::steady_clock> finish = std::chrono::steady_clock::now();
-                nanoseconds_waiting_mutex_.fetch_add(std::chrono::duration<uint64_t, std::nano>(finish - start).count());
-                primes_.insert(i);
-                const std::chrono::time_point<std::chrono::steady_clock> finish2 = std::chrono::steady_clock::now();
-                nanoseconds_under_mutex_.fetch_add(std::chrono::duration<uint64_t, std::nano>(finish2 - finish).count());
-
-                set_mutex_.unlock();
-
+                pr.push_back(i);
             }
         }
 
-
+        const std::chrono::time_point<std::chrono::steady_clock> start = std::chrono::steady_clock::now();
+        set_mutex_.lock();
+        const std::chrono::time_point<std::chrono::steady_clock> finish = std::chrono::steady_clock::now();
+        nanoseconds_waiting_mutex_.fetch_add(std::chrono::duration<uint64_t, std::nano>(finish - start).count());
+        for(auto el : pr)
+            primes_.insert(el);
+        const std::chrono::time_point<std::chrono::steady_clock> finish2 = std::chrono::steady_clock::now();
+        nanoseconds_under_mutex_.fetch_add(std::chrono::duration<uint64_t, std::nano>(finish2 - finish).count());
+        set_mutex_.unlock();
     }
 
     // Посчитать количество простых чисел в диапазоне [from, to)
