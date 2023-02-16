@@ -37,7 +37,7 @@ int main() {
     std::cout << "Max concurrent threads: " << std::thread::hardware_concurrency() << std::endl;
     std::cout << "Threads to be created: " << threadsCount << std::endl;
 
-    const uint64_t batchSize = limit / threadsCount;
+    const uint64_t batchSize = limit / threadsCount; //1250000
 
     std::chrono::seconds multithreadDuration;
 
@@ -48,6 +48,7 @@ int main() {
 
         for (uint64_t from = 0, to = batchSize; from < limit; from = to, to = std::min(to + batchSize, limit)) {
             threads.emplace_back(ThreadFunction, std::ref(primes), from, to);
+            //Function templates ref and cref are helper functions that generate an object of type std::reference_wrapper
         }
 
         size_t previousCount, newCount = 0;
