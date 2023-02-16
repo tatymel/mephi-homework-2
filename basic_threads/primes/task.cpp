@@ -66,6 +66,7 @@ PrimeNumbersSet::PrimeNumbersSet() = default;
         //std::lock_guard<std::mutex> lo(set_mutex_);
         if(!primes_.empty())
             return *primes_.rbegin();
+        return 0;
     }
 
     // Получить суммарное время, проведенное в ожидании лока мьютекса во время работы функции AddPrimesInRange
