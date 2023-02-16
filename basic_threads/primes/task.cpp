@@ -1,7 +1,6 @@
 
 
 #include "task.h"
-#include <vector>
 
 PrimeNumbersSet::PrimeNumbersSet() {
     nanoseconds_waiting_mutex_ = 0;
@@ -12,6 +11,7 @@ PrimeNumbersSet::PrimeNumbersSet() {
         std::lock_guard<std::mutex> lo(set_mutex_);
         return primes_.find(number) != primes_.end();
     }
+
 
     // Получить следующее по величине простое число из множества
     uint64_t PrimeNumbersSet::GetNextPrime(uint64_t number) const{
