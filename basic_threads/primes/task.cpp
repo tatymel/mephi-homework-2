@@ -20,6 +20,7 @@ uint64_t PrimeNumbersSet::GetNextPrime(uint64_t number) const{
     }else{
         throw std::invalid_argument("error");
     }
+    
 }
 
 void PrimeNumbersSet::AddPrimesInRange(uint64_t from, uint64_t to){
@@ -32,7 +33,7 @@ void PrimeNumbersSet::AddPrimesInRange(uint64_t from, uint64_t to){
                 break;
             }
         }
-        
+
         if(fl && i != 1 && i != 0){
             const std::chrono::time_point<std::chrono::steady_clock> start = std::chrono::steady_clock::now();
             set_mutex_.lock();
