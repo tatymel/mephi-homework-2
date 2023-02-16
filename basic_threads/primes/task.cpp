@@ -46,9 +46,10 @@ PrimeNumbersSet::PrimeNumbersSet() {
         nanoseconds_waiting_mutex_.fetch_add(std::chrono::duration<uint64_t, std::nano>(finish - start).count());
         for(uint64_t el : pr)
             primes_.insert(el);
+        set_mutex_.unlock();
         const std::chrono::time_point<std::chrono::steady_clock> finish2 = std::chrono::steady_clock::now();
         nanoseconds_under_mutex_.fetch_add(std::chrono::duration<uint64_t, std::nano>(finish2 - finish).count());
-        set_mutex_.unlock();
+
     }
 
     // Посчитать количество простых чисел в диапазоне [from, to)
