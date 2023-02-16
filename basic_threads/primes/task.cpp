@@ -37,9 +37,10 @@ PrimeNumbersSet::PrimeNumbersSet() = default;
                 const std::chrono::time_point<std::chrono::high_resolution_clock> finish = std::chrono::high_resolution_clock::now();
                 nanoseconds_waiting_mutex_.fetch_add(std::chrono::duration<uint64_t, std::nano>(finish - start).count());
                 primes_.insert(i);
-                set_mutex_.unlock();
                 const std::chrono::time_point<std::chrono::high_resolution_clock> finish2 = std::chrono::high_resolution_clock::now();
                 nanoseconds_under_mutex_.fetch_add(std::chrono::duration<uint64_t, std::nano>(finish2 - finish).count());
+
+                set_mutex_.unlock();
 
             }
         }
