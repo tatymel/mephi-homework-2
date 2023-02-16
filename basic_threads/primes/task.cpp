@@ -64,7 +64,8 @@ PrimeNumbersSet::PrimeNumbersSet() = default;
     // Получить наибольшее простое число из множества
     uint64_t PrimeNumbersSet::GetMaxPrimeNumber() const{
         //std::lock_guard<std::mutex> lo(set_mutex_);
-        return *primes_.rbegin();
+        if(!primes_.empty())
+            return *primes_.rbegin();
     }
 
     // Получить суммарное время, проведенное в ожидании лока мьютекса во время работы функции AddPrimesInRange
