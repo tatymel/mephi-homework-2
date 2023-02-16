@@ -42,13 +42,13 @@ public:
                 }
             }
             if(fl && i != 1 && i != 0){
-                const std::chrono::time_point start = std::chrono::high_resolution_clock::now();
+                const std::chrono::time_point<std::chrono::high_resolution_clock> start = std::chrono::high_resolution_clock::now();
                 set_mutex_.lock();
-                const std::chrono::time_point finish = std::chrono::high_resolution_clock::now();
+                const std::chrono::time_point<std::chrono::high_resolution_clock> finish = std::chrono::high_resolution_clock::now();
                 nanoseconds_waiting_mutex_.fetch_add(std::chrono::duration<uint64_t, std::nano>(finish - start).count());
                 primes_.insert(i);
                 set_mutex_.unlock();
-                const std::chrono::time_point finish2 = std::chrono::high_resolution_clock::now();
+                const std::chrono::time_point<std::chrono::high_resolution_clock> finish2 = std::chrono::high_resolution_clock::now();
                 nanoseconds_under_mutex_.fetch_add(std::chrono::duration<uint64_t, std::nano>(finish2 - finish).count());
 
             }
@@ -84,7 +84,6 @@ public:
     // Получить суммарное время, проведенное в коде под локом во время работы функции AddPrimesInRange
     std::chrono::nanoseconds GetTotalTimeUnderMutex() const{
         return std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::nanoseconds((nanoseconds_under_mutex_)));
-        //return std::chrono::nanoseconds((nanoseconds_waiting_mutex_));
     }
 private:
     std::set<uint64_t> primes_;
