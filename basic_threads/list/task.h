@@ -57,7 +57,6 @@ public:
 
         bool operator !=(const Iterator& rhs) const {
         }
-
     };
 
     /*
