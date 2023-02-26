@@ -45,7 +45,7 @@ public:
         Iterator(TListNode* cur) : current_(std::move(cur)){}
 
         T& operator *() {
-            std::shared_lock uniqueLock(current_->mutex_);
+            std::unique_lock uniqueLock(current_->mutex_);
             return current_->value_;
         }
 
@@ -55,7 +55,7 @@ public:
         }
 
         T* operator ->() {
-            std::shared_lock uniqueLock(current_->mutex_);
+            std::unique_lock uniqueLock(current_->mutex_);
             return &(current_->value_);
         }
 
