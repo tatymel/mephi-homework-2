@@ -136,20 +136,21 @@ public:
      */
     void insert(Iterator position, const T& value) {
         std::lock_guard<std::mutex> uniqueLock(mutex_);
-        Iterator pos = position;
         TListNode* newNode = new TListNode(value);
 
         if(head_ == nullptr){
             head_ = newNode;
             tail_ = head_;
             end_->prev_ = tail_;
+            tail_->next_ = end_;
         }else{
-            TListNode* it = pos.GetCurrent();
+            TListNode* it = position.GetCurrent();
             if (it == nullptr) {
                 tail_->next_ = newNode;
                 newNode->prev_ = tail_;
                 tail_ = newNode;
                 end_->prev_ = tail_;
+                tail_->next_ = end_;
             } else if (it == head_) {
                 newNode->next_ = head_;
                 head_->prev_ = newNode;
