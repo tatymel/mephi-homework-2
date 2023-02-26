@@ -45,54 +45,63 @@ public:
         Iterator(TListNode* cur) : current_(std::move(cur)){}
 
         T& operator *() {
+            std::unique_lock<std::mutex> uniqueLock(current_->mutex_);
             return current_->value_;
         }
 
         T operator *() const {
-            //T val = current_->value_;
+            std::unique_lock<std::mutex> uniqueLock(current_->mutex_);
             return current_->value_;
         }
 
         T* operator ->() {
+            std::unique_lock<std::mutex> uniqueLock(current_->mutex_);
             return &(current_->value_);
         }
 
         const T* operator ->() const {
+            std::unique_lock<std::mutex> uniqueLock(current_->mutex_);
             return &(current_->value_);
         }
 
         Iterator& operator ++() {
+            std::unique_lock<std::mutex> uniqueLock(current_->mutex_);
             current_ = current_->next_;
             return *this;
         }
 
         Iterator operator ++(int) {
+            std::unique_lock<std::mutex> uniqueLock(current_->mutex_);
             Iterator old = *this;
             ++(*this);
             return old;
         }
 
         Iterator& operator --() {
-
+            std::unique_lock<std::mutex> uniqueLock(current_->mutex_);
             current_ = current_->prev_;
             return *this;
         }
 
         Iterator operator --(int) {
+            std::unique_lock<std::mutex> uniqueLock(current_->mutex_);
             Iterator old = *this;
             --(*this);
             return old;
         }
 
         bool operator ==(const Iterator& rhs) const {
+            //std::unique_lock<std::mutex> uniqueLock(current_->mutex_);
             return rhs.current_ == current_;
         }
 
         bool operator !=(const Iterator& rhs) const {
+            //std::unique_lock<std::mutex> uniqueLock(current_->mutex_);
             return !(rhs == *this);
         }
 
         TListNode* GetCurrent() const{
+            std::unique_lock<std::mutex> uniqueLock(current_->mutex_);
             return current_;
         }
     private:
