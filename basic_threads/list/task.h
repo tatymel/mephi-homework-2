@@ -43,8 +43,10 @@ public:
         using iterator_category = std::bidirectional_iterator_tag;
 
         Iterator(TListNode* cur) : current_(std::move(cur)){}
+        Iterator(const Iterator& other) : current_(std::move(other.current_)){}
 
         T& operator *() {
+            iterMutex_.lock();
             std::unique_lock uniqueLock(current_->mutex_);
             return current_->value_;
         }
@@ -70,6 +72,7 @@ public:
             std::lock_guard uniqueLock(current_->mutex_);
 
             current_ = current_->next_;
+            iterMutex_.unlock();
             return *this;
         }
 
@@ -113,6 +116,7 @@ public:
         }
     private:
         TListNode* current_;
+        std::mutex iterMutex_;
     };
 
     /*
@@ -148,14 +152,12 @@ public:
         }else{
             TListNode* it = position.GetCurrent();
             if (it == nullptr) {
-                std::lock_guard uniqueLock1(tail_->mutex_);
                 tail_->next_ = newNode;
                 newNode->prev_ = tail_;
                 tail_ = newNode;
                 end_->prev_ = tail_;
                 tail_->next_ = end_;
             } else if (it == head_) {
-                std::lock_guard uniqueLock1(head_->mutex_);
                 newNode->next_ = head_;
                 head_->prev_ = newNode;
                 head_ = newNode;
@@ -178,11 +180,21 @@ public:
         TListNode* it = position.GetCurrent();
 
         if(it != nullptr) {
-            it->prev_->next_ = it->next_;
-            it->next_->prev_ = it->prev_;
+            if(it == head_){
+                head_ = it->next_;
+                head_->prev_ = nullptr;
+            }else if(it == tail_){
+                tail_ = it->prev_;
+                tail_->next_ = end_;
+                end_->prev_ = tail_;
+            }else {
+                it->prev_->next_ = it->next_;
+                it->next_->prev_ = it->prev_;
 
-            it->next_ = nullptr;
-            it->prev_ = nullptr;
+
+                it->next_ = nullptr;
+                it->prev_ = nullptr;
+            }
         }
     }
 private:
