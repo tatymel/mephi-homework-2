@@ -104,7 +104,7 @@ public:
         }
 
         bool operator !=(const Iterator& rhs) const {
-            //std::lock_guard uniqueLock(current_->mutex_);
+            std::lock_guard uniqueLock(current_->mutex_);
             return !(rhs == *this);
         }
 
@@ -152,10 +152,12 @@ public:
                 end_->prev_ = tail_;
                 tail_->next_ = end_;
             } else if (it == head_) {
+
                 newNode->next_ = head_;
                 head_->prev_ = newNode;
                 head_ = newNode;
             } else {
+
                 newNode->prev_ = it->prev_;
                 newNode->next_ = it;
                 it->prev_->next_ = newNode;
@@ -172,11 +174,13 @@ public:
         std::lock_guard<std::mutex> uniqueLock(mutex_);
         TListNode* it = position.GetCurrent();
 
-        it->prev_->next_ = it->next_;
-        it->next_->prev_ = it->prev_;
+        if(it != nullptr) {
+            it->prev_->next_ = it->next_;
+            it->next_->prev_ = it->prev_;
 
-        it->next_ = nullptr;
-        it->prev_ = nullptr;
+            it->next_ = nullptr;
+            it->prev_ = nullptr;
+        }
     }
 private:
     TListNode* head_ = nullptr;
