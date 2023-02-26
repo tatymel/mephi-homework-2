@@ -148,13 +148,14 @@ public:
         }else{
             TListNode* it = position.GetCurrent();
             if (it == nullptr) {
+                std::lock_guard uniqueLock1(tail_->mutex_);
                 tail_->next_ = newNode;
                 newNode->prev_ = tail_;
                 tail_ = newNode;
                 end_->prev_ = tail_;
                 tail_->next_ = end_;
             } else if (it == head_) {
-
+                std::lock_guard uniqueLock1(head_->mutex_);
                 newNode->next_ = head_;
                 head_->prev_ = newNode;
                 head_ = newNode;
