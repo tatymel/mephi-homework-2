@@ -86,8 +86,6 @@ public:
                 std::lock_guard sharedLock1(current_->prev_->mutex_);
 
             std::lock_guard uniqueLock(current_->mutex_);
-
-
             current_ = current_->prev_;
             return *this;
         }
@@ -138,7 +136,7 @@ public:
      */
     void insert(Iterator position, const T& value) {
         std::lock_guard<std::mutex> uniqueLock(mutex_);
-
+        Iterator pos = position;
         TListNode* newNode = new TListNode(value);
 
         if(head_ == nullptr){
@@ -146,7 +144,7 @@ public:
             tail_ = head_;
             end_->prev_ = tail_;
         }else{
-            TListNode* it = position.GetCurrent();
+            TListNode* it = pos.GetCurrent();
             if (it == nullptr) {
                 tail_->next_ = newNode;
                 newNode->prev_ = tail_;
