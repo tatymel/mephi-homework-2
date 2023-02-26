@@ -98,7 +98,7 @@ public:
         }
 
         bool operator !=(const Iterator& rhs) const {
-            //std::unique_lock sharedLock(current_->mutex_);
+            std::unique_lock sharedLock(current_->mutex_);
             return !(rhs == *this);
         }
 
