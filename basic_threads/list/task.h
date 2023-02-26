@@ -103,6 +103,7 @@ public:
      * Получить итератор, указывающий на первый элемент списка
      */
     Iterator begin() {
+        std::unique_lock<std::mutex> uniqueLock(mutex_);
         return Iterator(head_);
     }
 
@@ -110,6 +111,7 @@ public:
      * Получить итератор, указывающий на "элемент после последнего" элемента в списке
      */
     Iterator end() {
+        std::unique_lock<std::mutex> uniqueLock(mutex_);
         return Iterator(end_);
     }
 
