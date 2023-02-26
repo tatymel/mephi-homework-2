@@ -47,29 +47,29 @@ public:
 
         T& operator *() {
             //iterMutex_.lock();
-            std::lock_guard uniqueLock(current_->mutex_);
+            //std::lock_guard uniqueLock(current_->mutex_);
             return current_->value_;
         }
 
         T operator *() const {
-            std::lock_guard uniqueLock(current_->mutex_);
+            //std::lock_guard uniqueLock(current_->mutex_);
             return current_->value_;
         }
 
         T* operator ->() {
-            std::lock_guard uniqueLock(current_->mutex_);
+            //std::lock_guard uniqueLock(current_->mutex_);
             return &(current_->value_);
         }
 
         const T* operator ->() const {
-            std::lock_guard uniqueLock(current_->mutex_);
+            //std::lock_guard uniqueLock(current_->mutex_);
             return &(current_->value_);
         }
 
         Iterator& operator ++() {
-            if(current_->next_ != nullptr)
+            /*if(current_->next_ != nullptr)
                 std::lock_guard sharedLock1(current_->next_->mutex_);
-            std::lock_guard uniqueLock(current_->mutex_);
+            std::lock_guard uniqueLock(current_->mutex_);*/
 
             current_ = current_->next_;
             //iterMutex_.unlock();
@@ -85,10 +85,10 @@ public:
         }
 
         Iterator& operator --() {
-            if(current_->prev_ != nullptr)
+            /*if(current_->prev_ != nullptr)
                 std::lock_guard sharedLock1(current_->prev_->mutex_);
 
-            std::lock_guard uniqueLock(current_->mutex_);
+            std::lock_guard uniqueLock(current_->mutex_);*/
             current_ = current_->prev_;
             //iterMutex_.unlock();
             return *this;
