@@ -28,7 +28,7 @@ public:
         TListNode* next_ = nullptr;
         TListNode* prev_ = nullptr;
         T value_;
-        mutable std::shared_mutex mutex_;
+        mutable std::mutex mutex_;
         TListNode() = default;
         TListNode(const T& val) :  value_(std::move(val)){}
 
@@ -45,29 +45,30 @@ public:
         Iterator(TListNode* cur) : current_(std::move(cur)){}
 
         T& operator *() {
-            std::unique_lock uniqueLock(current_->mutex_);
+            std::lock_guard uniqueLock(current_->mutex_);
             return current_->value_;
         }
 
         T operator *() const {
-            std::unique_lock uniqueLock(current_->mutex_);
+            std::lock_guard uniqueLock(current_->mutex_);
             return current_->value_;
         }
 
         T* operator ->() {
-            std::unique_lock uniqueLock(current_->mutex_);
+            std::lock_guard uniqueLock(current_->mutex_);
             return &(current_->value_);
         }
 
         const T* operator ->() const {
-            std::unique_lock uniqueLock(current_->mutex_);
+            std::lock_guard uniqueLock(current_->mutex_);
             return &(current_->value_);
         }
 
         Iterator& operator ++() {
-            std::unique_lock uniqueLock(current_->mutex_);
-            //if(current_->next_ != nullptr)
-            //  std::shared_lock sharedLock1(current_->mutex_);
+            if(current_->next_ != nullptr)
+                std::lock_guard sharedLock1(current_->next_->mutex_);
+            std::lock_guard uniqueLock(current_->mutex_);
+
             current_ = current_->next_;
             return *this;
         }
@@ -75,33 +76,37 @@ public:
         Iterator operator ++(int) {
 
             Iterator old = *this;
-            std::unique_lock<std::mutex> uniqueLock(old.current_->mutex_);
+            std::lock_guard<std::mutex> uniqueLock(old.current_->mutex_);
             ++(*this);
             return old;
         }
 
         Iterator& operator --() {
-            std::unique_lock uniqueLock(current_->mutex_);
+            if(current_->prev_ != nullptr)
+                std::lock_guard sharedLock1(current_->prev_->mutex_);
+
+            std::lock_guard uniqueLock(current_->mutex_);
+
 
             current_ = current_->prev_;
             return *this;
         }
 
         Iterator operator --(int) {
-            //std::unique_lock<std::mutex> uniqueLock(current_->mutex_);
+            //std::lock_guard<std::mutex> uniqueLock(current_->mutex_);
             Iterator old = *this;
-            std::unique_lock<std::mutex> uniqueLock(old.current_->mutex_);
+            std::lock_guard<std::mutex> uniqueLock(old.current_->mutex_);
             --(*this);
             return old;
         }
 
         bool operator ==(const Iterator& rhs) const {
-            //std::unique_lock uniqueLock(current_->mutex_);
+            //std::lock_guard uniqueLock(current_->mutex_);
             return rhs.current_ == current_;
         }
 
         bool operator !=(const Iterator& rhs) const {
-            //std::unique_lock uniqueLock(current_->mutex_);
+            //std::lock_guard uniqueLock(current_->mutex_);
             return !(rhs == *this);
         }
 
@@ -116,7 +121,7 @@ public:
      * Получить итератор, указывающий на первый элемент списка
      */
     Iterator begin() const {
-        std::unique_lock<std::mutex> uniqueLock(mutex_);
+        std::lock_guard<std::mutex> uniqueLock(mutex_);
         return Iterator(head_);
     }
 
@@ -124,7 +129,7 @@ public:
      * Получить итератор, указывающий на "элемент после последнего" элемента в списке
      */
     Iterator end() const {
-        std::unique_lock<std::mutex> uniqueLock(mutex_);
+        std::lock_guard<std::mutex> uniqueLock(mutex_);
         return Iterator(end_);
     }
 
@@ -132,7 +137,7 @@ public:
      * Вставить новый элемент в список перед элементом, на который указывает итератор `position`
      */
     void insert(Iterator position, const T& value) {
-        std::unique_lock<std::mutex> uniqueLock(mutex_);
+        std::lock_guard<std::mutex> uniqueLock(mutex_);
 
         TListNode* newNode = new TListNode(value);
 
@@ -152,9 +157,9 @@ public:
                 end_->prev_ = tail_;
             } else if (it == head_) {
 
-                std::lock_guard lockk(it->mutex_);
-                std::lock_guard lock1(head_->mutex_);
-                std::lock_guard lock(newNode->mutex_);
+                /* std::lock_guard lockk(it->mutex_);
+                 std::lock_guard lock1(head_->mutex_);
+                 std::lock_guard lock(newNode->mutex_);*/
 
                 newNode->next_ = head_;
                 head_->prev_ = newNode;
@@ -176,7 +181,7 @@ public:
      * Стереть из списка элемент, на который указывает итератор `position`
      */
     void erase(Iterator position) {
-        std::unique_lock<std::mutex> uniqueLock(mutex_);
+        std::lock_guard<std::mutex> uniqueLock(mutex_);
         TListNode* it = position.GetCurrent();
 
         it->prev_->next_ = it->next_;
