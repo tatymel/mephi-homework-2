@@ -119,7 +119,8 @@ public:
      * Получить итератор, указывающий на первый элемент списка
      */
     Iterator begin() const {
-        std::lock_guard<std::mutex> uniqueLock(mutex_);
+        std::lock_guard uniqueLock(mutex_);
+        std::lock_guard uniqueLock1(head_->mutex_);
         return Iterator(head_);
     }
 
@@ -128,6 +129,7 @@ public:
      */
     Iterator end() const {
         std::lock_guard<std::mutex> uniqueLock(mutex_);
+        std::lock_guard uniqueLock1(end_->mutex_);
         return Iterator(end_);
     }
 
