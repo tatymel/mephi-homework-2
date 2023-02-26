@@ -101,7 +101,7 @@ public:
         }
 
         TListNode* GetCurrent() const{
-            std::unique_lock<std::mutex> uniqueLock(current_->mutex_);
+            //std::unique_lock<std::mutex> uniqueLock(current_->mutex_);
             return current_;
         }
     private:
