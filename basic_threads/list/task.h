@@ -25,12 +25,12 @@ public:
      */
     ThreadSafeList(): end_(new TListNode()){}
     struct TListNode{
-        TListNode* next_;
-        TListNode* prev_;
+        TListNode* next_ = nullptr;
+        TListNode* prev_ = nullptr;
         T value_;
-        mutable std::shared_mutex mutex_;
+        mutable std::mutex mutex_;
         TListNode() = default;
-        TListNode(const T& val) : next_(nullptr), prev_(nullptr), value_(std::move(val)){}
+        TListNode(const T& val) : value_(std::move(val)){}
 
     };
 
@@ -45,29 +45,28 @@ public:
         Iterator(TListNode* cur) : current_(std::move(cur)){}
 
         T& operator *() {
-            std::shared_lock sharedLock(current_->mutex_);
+            std::unique_lock sharedLock(current_->mutex_);
             return current_->value_;
         }
 
         T operator *() const {
-            std::shared_lock sharedLock(current_->mutex_);
+            std::unique_lock sharedLock(current_->mutex_);
             return current_->value_;
         }
 
         T* operator ->() {
-            std::shared_lock sharedLock(current_->mutex_);
+            std::unique_lock sharedLock(current_->mutex_);
             return &(current_->value_);
         }
 
         const T* operator ->() const {
-            std::shared_lock sharedLock(current_->mutex_);
+            std::unique_lock sharedLock(current_->mutex_);
             return &(current_->value_);
         }
 
         Iterator& operator ++() {
-            std::shared_lock sharedLock(current_->mutex_);
-            if(current_->next_ != nullptr)
-                std::shared_lock sharedLock1(current_->next_->mutex_);
+            std::unique_lock sharedLock(current_->mutex_);
+
             current_ = current_->next_;
             return *this;
         }
@@ -80,9 +79,8 @@ public:
         }
 
         Iterator& operator --() {
-            std::shared_lock sharedLock(current_->mutex_);
-            if(current_->prev_ != nullptr)
-                std::shared_lock sharedLock1(current_->prev_->mutex_);
+            std::unique_lock sharedLock(current_->mutex_);
+
             current_ = current_->prev_;
             return *this;
         }
@@ -95,12 +93,12 @@ public:
         }
 
         bool operator ==(const Iterator& rhs) const {
-            //std::shared_lock sharedLock(current_->mutex_);
+            //std::unique_lock sharedLock(current_->mutex_);
             return rhs.current_ == current_;
         }
 
         bool operator !=(const Iterator& rhs) const {
-            //std::shared_lock sharedLock(current_->mutex_);
+            //std::unique_lock sharedLock(current_->mutex_);
             return !(rhs == *this);
         }
 
