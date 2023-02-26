@@ -42,27 +42,27 @@ public:
         using difference_type = std::ptrdiff_t;
         using iterator_category = std::bidirectional_iterator_tag;
 
-        Iterator(TListNode* cur) : current_(std::move(cur)){}
-        Iterator(const Iterator& other) : current_(std::move(other.current_)){}
+        Iterator(TListNode* cur) : current_(std::move(cur)){iterMutex_.lock();}
+        Iterator(const Iterator& other) : current_(std::move(other.current_)){iterMutex_.lock();}
 
         T& operator *() {
-            iterMutex_.lock();
-            std::unique_lock uniqueLock(current_->mutex_);
+            //iterMutex_.lock();
+            std::lock_guard uniqueLock(current_->mutex_);
             return current_->value_;
         }
 
         T operator *() const {
-            std::shared_lock uniqueLock(current_->mutex_);
+            std::lock_guard uniqueLock(current_->mutex_);
             return current_->value_;
         }
 
         T* operator ->() {
-            std::unique_lock uniqueLock(current_->mutex_);
+            std::lock_guard uniqueLock(current_->mutex_);
             return &(current_->value_);
         }
 
         const T* operator ->() const {
-            std::shared_lock uniqueLock(current_->mutex_);
+            std::lock_guard uniqueLock(current_->mutex_);
             return &(current_->value_);
         }
 
@@ -72,7 +72,7 @@ public:
             std::lock_guard uniqueLock(current_->mutex_);
 
             current_ = current_->next_;
-            iterMutex_.unlock();
+            //iterMutex_.unlock();
             return *this;
         }
 
@@ -90,6 +90,7 @@ public:
 
             std::lock_guard uniqueLock(current_->mutex_);
             current_ = current_->prev_;
+            //iterMutex_.unlock();
             return *this;
         }
 
@@ -107,13 +108,14 @@ public:
         }
 
         bool operator !=(const Iterator& rhs) const {
-            std::lock_guard uniqueLock(current_->mutex_);
+            //std::lock_guard uniqueLock(current_->mutex_);
             return !(rhs == *this);
         }
 
         TListNode* GetCurrent() const{
             return current_;
         }
+        ~Iterator(){iterMutex_.unlock();}
     private:
         TListNode* current_;
         std::mutex iterMutex_;
