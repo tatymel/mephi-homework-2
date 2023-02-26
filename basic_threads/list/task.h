@@ -28,7 +28,7 @@ public:
         TListNode* next_ = nullptr;
         TListNode* prev_ = nullptr;
         T value_;
-        mutable std::mutex mutex_;
+        mutable std::shared_mutex mutex_;
         TListNode() = default;
         TListNode(const T& val) :  value_(std::move(val)){}
 
@@ -45,22 +45,22 @@ public:
         Iterator(TListNode* cur) : current_(std::move(cur)){}
 
         T& operator *() {
-            std::lock_guard uniqueLock(current_->mutex_);
+            std::shared_lock uniqueLock(current_->mutex_);
             return current_->value_;
         }
 
         T operator *() const {
-            std::lock_guard uniqueLock(current_->mutex_);
+            std::shared_lock uniqueLock(current_->mutex_);
             return current_->value_;
         }
 
         T* operator ->() {
-            std::lock_guard uniqueLock(current_->mutex_);
+            std::shared_lock uniqueLock(current_->mutex_);
             return &(current_->value_);
         }
 
         const T* operator ->() const {
-            std::lock_guard uniqueLock(current_->mutex_);
+            std::shared_lock uniqueLock(current_->mutex_);
             return &(current_->value_);
         }
 
@@ -76,7 +76,7 @@ public:
         Iterator operator ++(int) {
 
             Iterator old = *this;
-            std::lock_guard<std::mutex> uniqueLock(old.current_->mutex_);
+            //std::lock_guard<std::mutex> uniqueLock(old.current_->mutex_);
             ++(*this);
             return old;
         }
@@ -95,7 +95,7 @@ public:
         Iterator operator --(int) {
             //std::lock_guard<std::mutex> uniqueLock(current_->mutex_);
             Iterator old = *this;
-            std::lock_guard<std::mutex> uniqueLock(old.current_->mutex_);
+            //std::lock_guard<std::mutex> uniqueLock(old.current_->mutex_);
             --(*this);
             return old;
         }
@@ -146,30 +146,19 @@ public:
             tail_ = head_;
             end_->prev_ = tail_;
         }else{
-
-
             TListNode* it = position.GetCurrent();
             if (it == nullptr) {
-
                 tail_->next_ = newNode;
                 newNode->prev_ = tail_;
                 tail_ = newNode;
                 end_->prev_ = tail_;
             } else if (it == head_) {
-
-                /* std::lock_guard lockk(it->mutex_);
-                 std::lock_guard lock1(head_->mutex_);
-                 std::lock_guard lock(newNode->mutex_);*/
-
                 newNode->next_ = head_;
                 head_->prev_ = newNode;
                 head_ = newNode;
-
             } else {
-
                 newNode->prev_ = it->prev_;
                 newNode->next_ = it;
-
                 it->prev_->next_ = newNode;
                 it->prev_ = newNode;
             }
