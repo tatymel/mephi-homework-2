@@ -28,13 +28,101 @@
 
 class ThreadPool {
 public:
-    ThreadPool(size_t threadCount) {}
+    explicit ThreadPool(size_t threadCount){
 
-    void PushTask(const std::function<void()>& task) {}
+        isActive_.store(true);
+        isTerminate_.store(false);
+        threads_.reserve(threadCount);
 
-    void Terminate(bool wait) {}
+        for(int i = 0; i < threadCount; ++i){
+            threads_.emplace_back([&]{
+                while(true) {
+                    //std::cout << "tyt 42" << std::endl;
+                    if (!IsActive()) {
+                        //  std::cout << "tyt 44" << std::endl;
+                        break;
+                    }
 
-    bool IsActive() const {}
+                    {
+                        //std::cout << "tyt 49" << std::endl;
+                        std::unique_lock lock(mutex_);
+                        //std::cout << "tyt 51" << std::endl;
+                        if (!IsActive()) {
+                            //std::cout << "tyt 53" << std::endl;
+                            break;
+                        }
 
-    size_t QueueSize() const {}
+                        if (!tasks_.empty()) {
+
+                            std::function<void()> func = std::move(tasks_.front());
+                            tasks_.pop();
+
+                            lock.unlock();
+                            //std::cout << "tyt 63" << std::endl;
+                            func();
+                            //std::cout << "tyt 65" << std::endl;
+                        }else{
+                            if(isTerminate_){
+                                break;
+                            }
+                        }
+                    }
+
+                }
+
+                {
+                    std::unique_lock lock(mutex_);
+                    while (!tasks_.empty()) {
+                        //std::cout << "tyt 71" << std::endl;
+                        tasks_.pop();
+                    }
+                }
+            });
+        }
+    }
+
+    void PushTask(const std::function<void()>& task) {
+        std::lock_guard lock(mutex_);
+        if(!isTerminate_.load()) {
+            tasks_.push(task);
+        }else{
+            throw std::exception();
+        }
+    }
+    /*  * Если в метод Terminate передать флаг wait = true,
+              *  то пул подождет, пока потоки разберут все оставшиеся задачи в очереди, и только после этого завершит работу потоков.
+      * Если передать wait = false, то все невыполненные на момент вызова Terminate задачи, которые остались в очереди,
+              *  никогда не будут выполнены.
+      * После вызова Terminate в поток нельзя добавить новые задачи.*/
+    void Terminate(bool wait) {
+        std::unique_lock lock(mutex_);
+        isTerminate_.store(true);
+        if(!wait){
+            isActive_ = false;
+        }
+        //std::cout << "tyt 96" << std::endl;
+        lock.unlock();
+
+        for(auto& thread : threads_){
+            thread.join();
+        }
+
+    }
+
+    bool IsActive() const {
+        return isActive_.load();
+    }
+
+    size_t QueueSize() const {
+        std::unique_lock lock(mutex_);
+        return tasks_.size();
+    }
+private:
+    std::atomic<bool> isActive_;
+    std::atomic<bool> isTerminate_;
+
+    std::queue<std::function<void()>> tasks_;
+    std::vector<std::thread> threads_;
+
+    mutable std::mutex mutex_;
 };
