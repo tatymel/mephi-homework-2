@@ -44,7 +44,7 @@ public:
             hasReadElemnt_ = true;
 
             otherThreadRead_ = true;
-            blockThread_.notify_all();
+            blockThread_.notify_one();
             canPut_.notify_one();
             return val;
         }else{
