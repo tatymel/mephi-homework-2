@@ -34,7 +34,7 @@ public:
         isTerminate_.store(false);
         threads_.reserve(threadCount);
 
-        for(int i = 0; i < threadCount; ++i){
+        for(size_t i = 0; i < threadCount; ++i){
             threads_.emplace_back([&]{
                 while(true) {
                     //std::cout << "tyt 42" << std::endl;
