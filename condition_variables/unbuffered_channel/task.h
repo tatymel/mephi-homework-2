@@ -19,7 +19,6 @@ public:
         while(!hasReadElemnt_){
             canPut_.wait(lock);
         }
-
         value_ = data;
         hasReadElemnt_ = false;
         canGet_.notify_one();
