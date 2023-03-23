@@ -8,31 +8,31 @@ class SharedMutex {
 public:
 
     void lock() {
-        while (IsExclusive_.load() && Shared_.load() > 0){
+        int v = 0;
+        while (!Shared_.compare_exchange_weak(v, -1, std::memory_order::acquire)){
             //std::this_thread::sleep_for(200ms);
         }
-        IsExclusive_.store(true);
     }
 
     void unlock() {
-        if(IsExclusive_.load())
-            IsExclusive_.store(false);
+        Shared_.store(0, std::memory_order::release);
     }
 
-    void lock_shared() {
-        while(IsExclusive_.load())
-        {
-            //std::this_thread::sleep_for(200ms);
+    void lock_shared() {//-1 - TABOO
+        int val;
+        while(val == -1){
+            val = Shared_.load();
         }
-        Shared_.fetch_add(1);
+        Shared_.compare_exchange_weak(val, val + 1, std::memory_order::acquire);
     }
 
     void unlock_shared() {
-        if(Shared_.load() > 0){
-            Shared_.fetch_add(-1);
-        }
+        Shared_.fetch_sub(1, std::memory_order::release);
     }
 private:
     std::atomic<bool> IsExclusive_ = false;
     std::atomic<int> Shared_ = 0;
+
+    std::atomic<bool> likeMutexForLoad_;
+
 };
