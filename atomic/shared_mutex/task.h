@@ -2,9 +2,11 @@
 #include <atomic>
 #include <iostream>
 #include <thread>
+
 using namespace std::chrono_literals;
 class SharedMutex {
 public:
+
     void lock() {
         while (IsExclusive_.load() && Shared_.load() > 0){
             std::this_thread::sleep_for(200ms);
