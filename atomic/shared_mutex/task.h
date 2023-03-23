@@ -1,12 +1,15 @@
-#pragma once
+
 #include <atomic>
 #include <iostream>
+#include <chrono>
 #include <thread>
-
+using namespace std::chrono_literals;
 class SharedMutex {
 public:
     void lock() {
-        while (IsExclusive_.load() && Shared_.load() > 0){}
+        while (IsExclusive_.load() && Shared_.load() > 0){
+            std::this_thread::sleep_for(2ms);
+        }
         IsExclusive_.store(true);
     }
 
@@ -16,7 +19,7 @@ public:
     }
 
     void lock_shared() {
-        while(IsExclusive_.load()){}
+        while(IsExclusive_.load()){std::this_thread::sleep_for(2ms);}
         Shared_.fetch_add(1);
     }
 
@@ -28,6 +31,4 @@ public:
 private:
     std::atomic<bool> IsExclusive_ = false;
     std::atomic<int> Shared_ = 0;
-    //std::atomic<bool> isSharing;
-
 };
