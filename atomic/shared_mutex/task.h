@@ -1,4 +1,4 @@
-
+#pragma once
 #include <atomic>
 #include <iostream>
 #include <thread>
@@ -9,7 +9,7 @@ public:
 
     void lock() {
         while (IsExclusive_.load() && Shared_.load() > 0){
-            std::this_thread::sleep_for(200ms);
+            //std::this_thread::sleep_for(200ms);
         }
         IsExclusive_.store(true);
     }
@@ -22,7 +22,7 @@ public:
     void lock_shared() {
         while(IsExclusive_.load())
         {
-            std::this_thread::sleep_for(200ms);
+            //std::this_thread::sleep_for(200ms);
         }
         Shared_.fetch_add(1);
     }
