@@ -37,18 +37,13 @@ public:
         for(size_t i = 0; i < threadCount; ++i){
             threads_.emplace_back([&]{
                 while(true) {
-                    //std::cout << "tyt 42" << std::endl;
                     if (!IsActive()) {
-                        //  std::cout << "tyt 44" << std::endl;
                         break;
                     }
 
                     {
-                        //std::cout << "tyt 49" << std::endl;
                         std::unique_lock lock(mutex_);
-                        //std::cout << "tyt 51" << std::endl;
                         if (!IsActive()) {
-                            //std::cout << "tyt 53" << std::endl;
                             break;
                         }
 
@@ -58,9 +53,7 @@ public:
                             tasks_.pop();
 
                             lock.unlock();
-                            //std::cout << "tyt 63" << std::endl;
                             func();
-                            //std::cout << "tyt 65" << std::endl;
                         }else{
                             if(isTerminate_){
                                 break;
@@ -73,7 +66,6 @@ public:
                 {
                     std::unique_lock lock(mutex_);
                     while (!tasks_.empty()) {
-                        //std::cout << "tyt 71" << std::endl;
                         tasks_.pop();
                     }
                 }
@@ -89,11 +81,7 @@ public:
             throw std::exception();
         }
     }
-    /*  * Если в метод Terminate передать флаг wait = true,
-              *  то пул подождет, пока потоки разберут все оставшиеся задачи в очереди, и только после этого завершит работу потоков.
-      * Если передать wait = false, то все невыполненные на момент вызова Terminate задачи, которые остались в очереди,
-              *  никогда не будут выполнены.
-      * После вызова Terminate в поток нельзя добавить новые задачи.*/
+
     void Terminate(bool wait) {
         std::unique_lock lock(mutex_);
         isTerminate_.store(true);
