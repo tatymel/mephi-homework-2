@@ -1,14 +1,13 @@
 #pragma once
 #include <atomic>
 #include <iostream>
-#include <chrono>
 #include <thread>
 using namespace std::chrono_literals;
 class SharedMutex {
 public:
     void lock() {
         while (IsExclusive_.load() && Shared_.load() > 0){
-            std::this_thread::sleep_for(2ms);
+            std::this_thread::sleep_for(200ms);
         }
         IsExclusive_.store(true);
     }
@@ -19,14 +18,16 @@ public:
     }
 
     void lock_shared() {
-        while(IsExclusive_.load()){std::this_thread::sleep_for(2ms);}
+        while(IsExclusive_.load())
+        {
+            std::this_thread::sleep_for(200ms);
+        }
         Shared_.fetch_add(1);
     }
 
     void unlock_shared() {
         if(Shared_.load() > 0){
             Shared_.fetch_add(-1);
-
         }
     }
 private:
