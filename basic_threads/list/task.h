@@ -43,9 +43,12 @@ public:
 
         T& operator *() {
             //std::cout << "tut 45" << std::endl;
-            while(current_->uses){}
+            bool t = false;
+            do{
+                t = false;
+            }while(current_->uses.compare_exchange_strong(t, true));
             std::unique_lock l(current_->mutex_);
-            current_->uses.store(true);
+            //current_->uses.store(true);
             return current_->value;
         }
 
@@ -129,15 +132,12 @@ public:
         }
 
         bool operator !=(const Iterator& rhs) const {
-            if(current_ != nullptr) {
-                std::unique_lock l(current_->mutex_);
-                current_->uses.store(false);
+            //if(current_ != nullptr) {
+            std::unique_lock l(current_->mutex_);
+            current_->uses.store(false);
 
-                if(current_ == rhs.current_){
-                    return false;
-                }else
-                    return true;
-            }
+            return (current_ != rhs.current_);
+            //}
             if(rhs.current_ != nullptr){
                 return true;
             }
@@ -155,12 +155,12 @@ public:
      * Получить итератор, указывающий на первый элемент списка
      */
     Iterator begin() {
-        std::unique_lock l(headMutex_);
+        std::unique_lock l(allList_);
         //std::cout << "tut 154" << std::endl;
-        if(head_ != nullptr) {
-            //std::unique_lock l1(head_->mutex_);
-            head_->uses.store(false);
-        }
+        /* if(head_ != nullptr) {
+             //std::unique_lock l1(head_->mutex_);
+             head_->uses.store(false);
+         }*/
         return Iterator(head_);
     }
 
@@ -168,11 +168,11 @@ public:
      * Получить итератор, указывающий на "элемент после последнего" элемента в списке
      */
     Iterator end() {
-        std::unique_lock l(tailMutex_);
-        if(tail_ != nullptr) {
-            //std::unique_lock l1(tail_->mutex_);
-            tail_->uses.store(false);
-        }
+        std::unique_lock l(allList_);
+        /* if(tail_ != nullptr) {
+             //std::unique_lock l1(tail_->mutex_);
+             tail_->uses.store(false);
+         }*/
         //std::cout << "tut 127" << std::endl;
         return Iterator(tail_);
     }
@@ -196,10 +196,6 @@ public:
         }else{
             //std::cout << "tut 126" << std::endl;
             Node<T>* pos = position.getNode();
-            if(pos == nullptr) {
-                //  std::cout << "tut 129" << std::endl;
-                pos = tail_;
-            }
             pos = tail_;
             //std::cout << "tut 132" << std::endl;
             std::unique_lock lTemp(pos->mutex_);
