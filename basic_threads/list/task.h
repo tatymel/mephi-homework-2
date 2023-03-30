@@ -92,13 +92,13 @@ public:
 
         bool operator ==(const Iterator& rhs) const {
             std::unique_lock l(current_->mutex_);
-            std::cout << "tut 95" << std::endl;
+            //std::cout << "tut 95" << std::endl;
             return (rhs.current_ == current_);
         }
 
         bool operator !=(const Iterator& rhs) const {
             std::unique_lock l(current_->mutex_);
-            std::cout << "tut 101" << std::endl;
+            //std::cout << "tut 101" << std::endl;
             return (rhs.current_ != current_);
         }
         Node<T>* getNode()const{
@@ -124,7 +124,7 @@ public:
      */
     Iterator end() {
         std::unique_lock l(allList_);
-        std::cout << "tut 127" << std::endl;
+        //std::cout << "tut 127" << std::endl;
         return Iterator(tail_);
     }
 
