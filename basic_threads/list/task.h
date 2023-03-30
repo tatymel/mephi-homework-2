@@ -72,11 +72,12 @@ public:
         Iterator& operator ++() {
             std::unique_lock l(current_->mutex_);
             if(current_ != tail) {
+                std::unique_lock l1(current_->next->mutex_);
                 bool t = false;
                 do{
                     t = false;
                 }while(current_->next->uses.compare_exchange_strong(t, true));
-                std::unique_lock l1(current_->next->mutex_);
+
 
                 current_->uses.store(false);
                 current_ = current_->next;
@@ -101,11 +102,12 @@ public:
         Iterator& operator --() {
             std::unique_lock l(current_->mutex_);
             if(head != current_) {
+                std::unique_lock l1(current_->prev->mutex_);
                 bool t;
                 do{
                     t = false;
                 }while(current_->prev->uses.compare_exchange_strong(t, true));
-                std::unique_lock l1(current_->prev->mutex_);
+
 
                 current_->uses.store(false);
                 current_ = current_->prev;
