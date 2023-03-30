@@ -42,12 +42,13 @@ public:
         Iterator(Node<T>* pos, Node<T>* h, Node<T>* t) : current_(std::move(pos)), head(std::move(h)), tail(std::move(t)){}
 
         T& operator *() {
+            std::unique_lock l(current_->mutex_);
             //std::cout << "tut 45" << std::endl;
             bool t;
             do{
                 t = false;
             }while(current_->uses.compare_exchange_strong(t, true));
-            std::unique_lock l(current_->mutex_);
+
             return current_->value;
         }
 
@@ -129,22 +130,17 @@ public:
         }
 
         bool operator ==(const Iterator& rhs) const {
-            if(current_ != nullptr) {
-                std::unique_lock l(current_->mutex_);
-                //std::cout << "tut 95" << std::endl;
-                return (rhs.current_ == current_);
-            }else if(rhs.current_ == nullptr){
-                return true;
-            }
-            return false;
+            std::unique_lock l(current_->mutex_);
+            return (current_ == rhs.current_);
         }
 
         bool operator !=(const Iterator& rhs) const {
+            std::unique_lock l(current_->mutex_);
             bool t;
             do{
                 t = false;
             }while(current_->uses.compare_exchange_strong(t, true));
-            std::unique_lock l(current_->mutex_);
+
             current_->uses.store(false);
 
             return (current_ != rhs.current_);
@@ -248,4 +244,3 @@ private:
     std::mutex tailMutex_;
     std::mutex allList_;
 };
-//////////////////////////
