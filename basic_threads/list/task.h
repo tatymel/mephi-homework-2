@@ -56,13 +56,13 @@ public:
         }
 
         T* operator ->() {
-            std::shared_lock l(current_->mutex_);
+            std::unique_lock l(current_->mutex_);
             current_->uses.store(true);
             return &current_->value;
         }
 
         const T* operator ->() const {
-            std::shared_lock l(current_->mutex_);
+            std::unique_lock l(current_->mutex_);
             return &current_->value;
         }
 
