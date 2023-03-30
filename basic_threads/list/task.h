@@ -39,16 +39,15 @@ public:
         using difference_type = std::ptrdiff_t;
         using iterator_category = std::bidirectional_iterator_tag;
 
-        Iterator(Node<T>* pos) : current_(std::move(pos)){}
+        Iterator(Node<T>* pos, Node<T>* h, Node<T>* t) : current_(std::move(pos)), head(std::move(h)), tail(std::move(t)){}
 
         T& operator *() {
             //std::cout << "tut 45" << std::endl;
-            bool t = false;
+            bool t;
             do{
                 t = false;
             }while(current_->uses.compare_exchange_strong(t, true));
             std::unique_lock l(current_->mutex_);
-            //current_->uses.store(true);
             return current_->value;
         }
 
@@ -71,12 +70,16 @@ public:
 
         Iterator& operator ++() {
             std::unique_lock l(current_->mutex_);
-            if(current_->next != nullptr) {
+            if(current_ != tail) {
+                bool t = false;
+                do{
+                    t = false;
+                }while(current_->next->uses.compare_exchange_strong(t, true));
                 std::unique_lock l1(current_->next->mutex_);
 
                 current_->uses.store(false);
                 current_ = current_->next;
-
+                current_->uses.store(false);
             }else{
                 current_->uses.store(false);
                 current_ = current_->next;
@@ -96,11 +99,16 @@ public:
 
         Iterator& operator --() {
             std::unique_lock l(current_->mutex_);
-            if(current_->prev != nullptr) {
+            if(head != current_) {
+                bool t;
+                do{
+                    t = false;
+                }while(current_->prev->uses.compare_exchange_strong(t, true));
                 std::unique_lock l1(current_->prev->mutex_);
+
                 current_->uses.store(false);
                 current_ = current_->prev;
-
+                current_->uses.store(false);
                 //current_->uses.store(true);
             }else{
                 current_->uses.store(false);
@@ -132,16 +140,14 @@ public:
         }
 
         bool operator !=(const Iterator& rhs) const {
-            //if(current_ != nullptr) {
+            bool t;
+            do{
+                t = false;
+            }while(current_->uses.compare_exchange_strong(t, true));
             std::unique_lock l(current_->mutex_);
             current_->uses.store(false);
 
             return (current_ != rhs.current_);
-            //}
-            if(rhs.current_ != nullptr){
-                return true;
-            }
-            return false;
         }
         Node<T>* getNode()const{
             std::unique_lock l(current_->mutex_);
@@ -149,6 +155,8 @@ public:
         };
     private:
         Node<T>* current_;
+        Node<T>* head = nullptr;
+        Node<T>* tail = nullptr;
     };
 
     /*
@@ -156,12 +164,7 @@ public:
      */
     Iterator begin() {
         std::unique_lock l(allList_);
-        //std::cout << "tut 154" << std::endl;
-        /* if(head_ != nullptr) {
-             //std::unique_lock l1(head_->mutex_);
-             head_->uses.store(false);
-         }*/
-        return Iterator(head_);
+        return Iterator(head_, head_, tail_);
     }
 
     /*
@@ -169,12 +172,7 @@ public:
      */
     Iterator end() {
         std::unique_lock l(allList_);
-        /* if(tail_ != nullptr) {
-             //std::unique_lock l1(tail_->mutex_);
-             tail_->uses.store(false);
-         }*/
-        //std::cout << "tut 127" << std::endl;
-        return Iterator(tail_);
+        return Iterator(tail_, head_, tail_);
     }
 
     /*
@@ -219,6 +217,9 @@ public:
         std::unique_lock all(allList_);
         if(head_ != nullptr) {
             Node<T>* pos = position.getNode();
+
+
+
             std::unique_lock lT(pos->mutex_);
             std::unique_lock lPrev(pos->prev->mutex_);
             std::unique_lock lNext(pos->next->mutex_);
@@ -235,6 +236,7 @@ public:
             } else {
                 pos->next->prev = pos->prev;
                 pos->prev->next = pos->next;
+
             }
         }
     }
@@ -246,3 +248,4 @@ private:
     std::mutex tailMutex_;
     std::mutex allList_;
 };
+//////////////////////////
