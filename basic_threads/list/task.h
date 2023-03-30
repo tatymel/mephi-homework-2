@@ -132,18 +132,13 @@ public:
             if(current_ != nullptr) {
                 std::unique_lock l(current_->mutex_);
                 current_->uses.store(false);
-                if(rhs.current_ != nullptr) {
-                    std::unique_lock l1(rhs.current_->mutex_);
-                    rhs.current_->uses.store(false);
-                    if(current_ == rhs.current_){
-                        return false;
-                    }else
-                        return true;
-                }
-                return true;
+
+                if(current_ == rhs.current_){
+                    return false;
+                }else
+                    return true;
             }
             if(rhs.current_ != nullptr){
-                rhs.current_->uses.store(false);
                 return true;
             }
             return false;
@@ -163,7 +158,7 @@ public:
         std::unique_lock l(headMutex_);
         //std::cout << "tut 154" << std::endl;
         if(head_ != nullptr) {
-            std::unique_lock l1(head_->mutex_);
+            //std::unique_lock l1(head_->mutex_);
             head_->uses.store(false);
         }
         return Iterator(head_);
@@ -175,7 +170,7 @@ public:
     Iterator end() {
         std::unique_lock l(tailMutex_);
         if(tail_ != nullptr) {
-            std::unique_lock l1(tail_->mutex_);
+            //std::unique_lock l1(tail_->mutex_);
             tail_->uses.store(false);
         }
         //std::cout << "tut 127" << std::endl;
