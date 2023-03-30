@@ -19,7 +19,7 @@ struct Node{
     T value;
     std::mutex mutex_;
     Node() = default;
-    Node(Node<T>* n, Node<T>* p, const T& val) : next(n), prev(p), value(std::move(val)){}
+    Node(Node<T>* n, Node<T>* p, const T& val) : next(std::move(n)), prev(std::move(p)), value(std::move(val)){}
 };
 template<typename T>
 class ThreadSafeList {
