@@ -24,6 +24,7 @@ struct TorrentFile {
     std::string name;//debian-11.6.0-amd64-netinst.iso
     std::string infoHash;
 };//pieces31040
+
 using MapString = std::unordered_map<std::string, std::string>;
 using VecString = std::vector<std::string>;
 using VecVecString = std::vector<VecString>;
@@ -32,6 +33,7 @@ struct ForInfo{
     std::stringstream::pos_type pt_beg = -1;
     std::stringstream::pos_type pt_end = -1;
 };
+
 bool check(std::stringstream& content){
     if (content.peek() == 'e') {
         content.get();
@@ -39,6 +41,7 @@ bool check(std::stringstream& content){
     }
     return true;
 }
+
 long GetNumber(std::string str){
     long res = 0, dig = 1;
     for(size_t i = str.size(); i>0; --i){
@@ -47,6 +50,7 @@ long GetNumber(std::string str){
     }
     return res;
 }
+
 void GetKey(std::stringstream& content, std::string& key){
     long cnt, size_cnt;
     std::string array(100, '0');
@@ -60,6 +64,7 @@ void GetKey(std::stringstream& content, std::string& key){
         key += elem;
     }
 }
+
 void ExtractNumber(std::stringstream& content, std::string& number) {
     char elem = 'i';
     content.get();
@@ -81,6 +86,7 @@ void ExtractLst(std::stringstream& content,VecString& lst){
         lst.push_back(buffer);
     }
 }
+
 void ExtractLstLst(std::stringstream& content, std::string& name, VecVecString& lstlst){
     size_t i = 0;
     std::string stroka;
